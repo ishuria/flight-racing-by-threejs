@@ -67,8 +67,8 @@ class GameBoard {
     build_demo_game_board() {
         BulletHolder.length = 0;
         PlaneHolder.length = 0;
-        while(this.option.scene && this.option.scene.children.length > 0){ 
-            this.option.scene.remove(this.option.scene.children[0]); 
+        while (this.option.scene && this.option.scene.children.length > 0) {
+            this.option.scene.remove(this.option.scene.children[0]);
         }
         // Set the position of the camera
         this.camera.position.x = 0;
@@ -143,8 +143,8 @@ class GameBoard {
     build_ai_game_board() {
         BulletHolder.length = 0;
         PlaneHolder.length = 0;
-        while(this.option.scene && this.option.scene.children.length > 0){ 
-            this.option.scene.remove(this.option.scene.children[0]); 
+        while (this.option.scene && this.option.scene.children.length > 0) {
+            this.option.scene.remove(this.option.scene.children[0]);
         }
         // Set the position of the camera
         this.camera.position.x = 200;
@@ -222,41 +222,6 @@ class GameBoard {
 
         // const helper = new THREE.CameraHelper( camera );
         // scene.add( helper );
-
-        window.addEventListener("keydown", onDocumentKeyDown, false);
-        function onDocumentKeyDown(event) {
-            var keyCode = event.which;
-            console.log(keyCode);
-            if (keyCode == 87) {
-                Controls.forward = true;
-            } else if (keyCode == 83) {
-                Controls.backward = true;
-            } else if (keyCode == 65) {
-                Controls.leftward = true;
-            } else if (keyCode == 68) {
-                Controls.rightward = true;
-            } else if (keyCode == 74) {
-                Controls.shoot = true;
-            }
-        };
-
-        window.addEventListener("keyup", onDocumentKeyUp, false);
-        function onDocumentKeyUp(event) {
-            var keyCode = event.which;
-            console.log(keyCode);
-            if (keyCode == 87) {
-                Controls.forward = false;
-            } else if (keyCode == 83) {
-                Controls.backward = false;
-            } else if (keyCode == 65) {
-                Controls.leftward = false;
-            } else if (keyCode == 68) {
-                Controls.rightward = false;
-            } else if (keyCode == 74) {
-                Controls.shoot = false;
-            }
-        };
-
     }
 }
 

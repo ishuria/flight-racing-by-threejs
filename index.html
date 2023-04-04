@@ -2,25 +2,94 @@
 <html>
 
 <head lang="en">
-    <meta charset="utf-8">
-    <title>My first three.js app</title>
-    <style>
-        body {
-            margin: 0;
-        }
+  <meta charset="utf-8">
+  <title>My first three.js app</title>
+  <style>
+    body {
+      margin: 0;
+    }
 
-        #info {
-            position: absolute;
-            top: 10px;
-            width: 100%;
-            text-align: center;
-            z-index: 100;
-            display: block;
-        }
-    </style>
-    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    #info {
+      position: absolute;
+      top: 10px;
+      width: 100%;
+      text-align: center;
+      z-index: 100;
+      display: block;
+    }
 
-    <script type="importmap">
+    .semi-transparent-button-left {
+      position: absolute;
+      display: block;
+      top: 50%;
+      left: 40%;
+      margin-right: -50%;
+      transform: translate(-50%, -50%);
+      box-sizing: border-box;
+      margin: 0 auto;
+      padding: 8px;
+      width: 80%;
+      max-width: 200px;
+      background: #fff;
+      /* fallback color for old browsers */
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      color: #fff;
+      text-align: center;
+      text-decoration: none;
+      letter-spacing: 1px;
+      transition: all 0.3s ease-out;
+    }
+
+    .semi-transparent-button-right {
+      position: absolute;
+      display: block;
+      top: 50%;
+      left: 60%;
+      margin-right: -50%;
+      transform: translate(-50%, -50%);
+      box-sizing: border-box;
+      margin: 0 auto;
+      padding: 8px;
+      width: 80%;
+      max-width: 200px;
+      background: #fff;
+      /* fallback color for old browsers */
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      color: #fff;
+      text-align: center;
+      text-decoration: none;
+      letter-spacing: 1px;
+      transition: all 0.3s ease-out;
+    }
+
+    .semi-transparent-info {
+      position: absolute;
+      display: none;
+      top: 10%;
+      left: 50%;
+      margin-right: -50%;
+      transform: translate(-50%, -50%);
+      box-sizing: border-box;
+      margin: 0 auto;
+      padding: 8px;
+      width: 80%;
+      max-width: 200px;
+      background: #fff;
+      /* fallback color for old browsers */
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      color: #fff;
+      text-align: center;
+      text-decoration: none;
+      letter-spacing: 1px;
+      transition: all 0.3s ease-out;
+    }
+  </style>
+  <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+
+  <script type="importmap">
           {
             "imports": {
               "three": "https://unpkg.com/three@0.151.0/build/three.module.js",
@@ -31,8 +100,11 @@
 </head>
 
 <body>
-    <div id="info"></div>
-    <script type="module" src="/main.js"></script>
+  <div id="info"></div>
+  <a class="semi-transparent-info" href="#">Press 'R' to return</a>
+  <a class="semi-transparent-button-left" href="#">Play with AI</a>
+  <a class="semi-transparent-button-right" href="#">Play with others</a>
+  <script type="module" src="/main.js"></script>
 </body>
 
 </html>
