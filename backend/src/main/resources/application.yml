@@ -1,0 +1,35 @@
+server:
+  port: 8029
+  servlet:
+      contextPath: /syncronizer
+      session:
+        timeout: 1D
+
+spring:
+  datasource:
+    url: jdbc:mysql://192.168.6.11:3306/ams_erp?characterEncoding=utf-8&useSSL=false
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.jdbc.Driver
+  tomcat:
+    test-on-borrow: true
+    validation-query: SELECT 1
+    validation-interval: 30000
+  profiles:
+    active: development
+  session:
+    timeout: 1D
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+logging:
+  level:
+    'org.springframework.web': DEBUG
+    'com.ams': DEBUG

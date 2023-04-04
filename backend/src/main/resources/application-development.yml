@@ -1,0 +1,17 @@
+websocket:
+  address: ws://127.0.0.1:8028/ws
+logging:
+  config: classpath:logback-development.xml
+spring:
+  redis:
+    host: 172.25.1.113
+    port: 6379
+
+minio:
+  endpoint: http://127.0.0.1:9000
+  accessKey: 6H3G1PSCARM7QJEXO6VW
+  secretKey: 2G7npe8QnUSefIHrhzuHOntCec+aD+i7k22sIGp+
+  bucketName: ams-erp
+
+mathServer:
+  url: http://127.0.0.1:8037
