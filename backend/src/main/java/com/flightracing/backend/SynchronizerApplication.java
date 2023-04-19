@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 //@EnableScheduling
 public class SynchronizerApplication {
 
+
 	public static void main(String[] args) {
 		SpringApplication.run(SynchronizerApplication.class, args);
 	}

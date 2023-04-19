@@ -1,7 +1,7 @@
 server:
-  port: 8029
+  port: 8027
   servlet:
-      contextPath: /syncronizer
+      contextPath: /web3d
       session:
         timeout: 1D
 
