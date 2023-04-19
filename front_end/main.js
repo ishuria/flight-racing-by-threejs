@@ -1,6 +1,7 @@
 import { GameBoard, GameBoardOption } from "./game_board";
 import * as THREE from 'three';
 import { Controls } from "./consts";
+import { init } from "./websockets/websocket";
 
 // 创建场景，全局唯一
 const scene = new THREE.Scene();
@@ -18,7 +19,18 @@ function build_ai_game_board() {
   document.querySelector('.semi-transparent-info').style.display = 'block';
 }
 
+function build_multi_game_board() {
+  // 连接websocket
+  // game_board.build_ai_game_board();
+  init();
+  // hide buttons
+  document.querySelector('.semi-transparent-button-left').style.display = 'none';
+  document.querySelector('.semi-transparent-button-right').style.display = 'none';
+  document.querySelector('.semi-transparent-info').style.display = 'block';
+}
+
 document.querySelector('.semi-transparent-button-left').addEventListener('click', build_ai_game_board);
+document.querySelector('.semi-transparent-button-right').addEventListener('click', build_multi_game_board);
 
 window.addEventListener("keydown", onDocumentKeyDown, false);
 function onDocumentKeyDown(event) {
