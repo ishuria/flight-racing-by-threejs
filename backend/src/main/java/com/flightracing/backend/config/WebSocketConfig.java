@@ -9,10 +9,11 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 
 import java.util.Arrays;
+import java.util.Collections;
+
 
 /**
- * @author buhao
- * @version WebSocketConfig.java, v 0.1 2019-10-18 15:45 buhao
+ * websocket的配置类
  */
 @Configuration
 @EnableWebSocket
@@ -21,7 +22,8 @@ public class WebSocketConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://127.0.0.1"));
+        // 允许从任意远端进行链接
+        configuration.setAllowedOrigins(Collections.singletonList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET","POST"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

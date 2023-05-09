@@ -1,12 +1,13 @@
 import { GameBoard, GameBoardOption } from "./game_board";
 import * as THREE from 'three';
-import { Controls } from "./consts";
+import { Controls, GameMode, GameModeMulti, SetGameMode } from "./consts";
 import { init } from "./websockets/websocket";
+
 
 // 创建场景，全局唯一
 const scene = new THREE.Scene();
 // 游戏选项
-const game_board_option = new GameBoardOption(true, false, false, scene);
+const game_board_option = new GameBoardOption(scene);
 // 展示demo内容
 const game_board = new GameBoard(game_board_option);
 
@@ -20,9 +21,10 @@ function build_ai_game_board() {
 }
 
 function build_multi_game_board() {
+  SetGameMode(GameModeMulti);
   // 连接websocket
-  // game_board.build_ai_game_board();
   init();
+  game_board.build_multi_game_board();
   // hide buttons
   document.querySelector('.semi-transparent-button-left').style.display = 'none';
   document.querySelector('.semi-transparent-button-right').style.display = 'none';
