@@ -1,5 +1,8 @@
-import { BulletHolder } from "../bullet";
+
+import { Scene } from "../consts";
+import { Bullet, BulletHolder } from "../bullet";
 import { Plane, PlaneHolder } from "../fighter";
+import * as THREE from 'three';
 
 let uuid = "";
 let Socket = null;
@@ -50,6 +53,14 @@ let uuidHandler = function (socket, data) {
 }
 
 let bulletHandler = function (socket, data) {
+    // 把服务器下发的玩家坐标列表和本地的对比
+    let bullet = JSON.parse(data.text)
+    if (bullet.uuid === uuid){
+      return;
+    }
+    let b = new Bullet(new THREE.Vector3( bullet.x, bullet.y, bullet.z ), new THREE.Vector3( bullet.direction_x, bullet.direction_y, bullet.direction_z ), Scene);
+    Scene.add(b.mesh);
+    BulletHolder.push(b);
 }
 
 let playerHandler = function (socket, data) {
@@ -99,4 +110,13 @@ let reportPosition = function (x, y, z, look_at_x, look_at_y, look_at_z) {
   Socket.send(JSON.stringify(message))
 }
 
-export { init, reportPosition, uuid };
+let reportBullet = function (x, y, z, direction_x, direction_y, direction_z) {
+  let message = {
+    "message_type": "bullet",
+    "uuid": uuid,
+    "text": JSON.stringify({ "x": x, "y": y, "z": z, "direction_x": direction_x, "direction_y": direction_y, "direction_z": direction_z, "uuid": uuid }),
+  }
+  Socket.send(JSON.stringify(message))
+}
+
+export { init, reportPosition, uuid, reportBullet };

@@ -8,11 +8,11 @@ public class Bullet {
     private long z;
 
     @JsonProperty("direction_x")
-    private long directionX;
+    private double directionX;
     @JsonProperty("direction_y")
-    private long directionY;
+    private double directionY;
     @JsonProperty("direction_z")
-    private long directionZ;
+    private double directionZ;
 
     private String uuid;
 
@@ -40,27 +40,27 @@ public class Bullet {
         this.z = z;
     }
 
-    public long getDirectionX() {
+    public double getDirectionX() {
         return directionX;
     }
 
-    public void setDirectionX(long directionX) {
+    public void setDirectionX(double directionX) {
         this.directionX = directionX;
     }
 
-    public long getDirectionY() {
+    public double getDirectionY() {
         return directionY;
     }
 
-    public void setDirectionY(long directionY) {
+    public void setDirectionY(double directionY) {
         this.directionY = directionY;
     }
 
-    public long getDirectionZ() {
+    public double getDirectionZ() {
         return directionZ;
     }
 
-    public void setDirectionZ(long directionZ) {
+    public void setDirectionZ(double directionZ) {
         this.directionZ = directionZ;
     }
 

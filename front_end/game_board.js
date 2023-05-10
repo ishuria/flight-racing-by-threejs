@@ -1,11 +1,16 @@
 import * as THREE from 'three';
+import { Water } from 'three/addons/objects/Water.js';
+import { Sky } from 'three/addons/objects/Sky.js';
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { Plane, PlaneHolder } from './fighter.js';
 import { Sea } from './sea.js';
 import { Controls, GameMode, GameModeAI, GameModeDemo, Scene, } from './consts.js';
 import { BulletHolder } from './bullet.js';
-import { reportPosition,  uuid } from './websockets/websocket.js';
+import { reportPosition, uuid } from './websockets/websocket.js';
 
 let animation_frame_id = 0;
+
+let water = null;
 
 class GameBoard {
     constructor() {
@@ -25,6 +30,7 @@ class GameBoard {
             farPlane
         );
         this.camera = camera;
+        this.water = null;
 
         // Create the renderer
         const renderer = new THREE.WebGLRenderer({
@@ -49,6 +55,9 @@ class GameBoard {
             animation_frame_id = requestAnimationFrame(animate);
             PlaneHolder.forEach(e => e.update());
             BulletHolder.forEach(e => e.update());
+            if (water) {
+                water.material.uniforms['time'].value += 1.0 / 60.0;
+            }
             renderer.render(Scene, camera);
         }
         animate();
@@ -224,7 +233,7 @@ class GameBoard {
         // 随机一个坐标
         let x = Math.floor((Math.random() * 100) + 1);
         let z = Math.floor((Math.random() * 100) + 1);
-        reportPosition(x, z);
+
 
         while (Scene && Scene.children.length > 0) {
             Scene.remove(Scene.children[0]);
@@ -277,14 +286,94 @@ class GameBoard {
         Scene.add(shadowLight);
 
 
-        const sea = new Sea();
-        // push it a little bit at the bottom of the scene
-        sea.mesh.position.x = 0;
-        sea.mesh.position.y = 0;
-        sea.mesh.position.z = 0;
+        // const sea = new Sea();
+        // // push it a little bit at the bottom of the scene
+        // sea.mesh.position.x = 0;
+        // sea.mesh.position.y = 0;
+        // sea.mesh.position.z = 0;
 
-        // add the mesh of the sea to the scene
-        Scene.add(sea.mesh);
+        // // add the mesh of the sea to the scene
+        // Scene.add(sea.mesh);
+
+        const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
+
+        water = new Water(
+            waterGeometry,
+            {
+                textureWidth: 512,
+                textureHeight: 512,
+                waterNormals: new THREE.TextureLoader().load('textures/waternormals.jpg', function (texture) {
+
+                    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+
+                }),
+                sunDirection: new THREE.Vector3(),
+                sunColor: 0xffffff,
+                waterColor: 0x001e0f,
+                distortionScale: 3.7,
+                fog: Scene.fog !== undefined
+            }
+        );
+
+        water.rotation.x = - Math.PI / 2;
+
+        Scene.add(water);
+
+        const sky = new Sky();
+        sky.scale.setScalar(10000);
+        Scene.add(sky);
+
+        const skyUniforms = sky.material.uniforms;
+
+        skyUniforms['turbidity'].value = 10;
+        skyUniforms['rayleigh'].value = 2;
+        skyUniforms['mieCoefficient'].value = 0.005;
+        skyUniforms['mieDirectionalG'].value = 0.8;
+
+        const parameters = {
+            elevation: 2,
+            azimuth: 180
+        };
+
+        let sun = new THREE.Vector3();
+
+        const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
+        let renderTarget;
+
+        function updateSun() {
+
+            const phi = THREE.MathUtils.degToRad(90 - parameters.elevation);
+            const theta = THREE.MathUtils.degToRad(parameters.azimuth);
+
+            sun.setFromSphericalCoords(1, phi, theta);
+
+            sky.material.uniforms['sunPosition'].value.copy(sun);
+            water.material.uniforms['sunDirection'].value.copy(sun).normalize();
+
+            if (renderTarget !== undefined) renderTarget.dispose();
+
+            renderTarget = pmremGenerator.fromScene(sky);
+
+            Scene.environment = renderTarget.texture;
+
+        }
+
+        updateSun();
+
+
+        // const gui = new GUI();
+
+        // const folderSky = gui.addFolder('Sky');
+        // folderSky.add(parameters, 'elevation', 0, 90, 0.1).onChange(updateSun);
+        // folderSky.add(parameters, 'azimuth', - 180, 180, 0.1).onChange(updateSun);
+        // folderSky.open();
+
+        // const waterUniforms = water.material.uniforms;
+
+        // const folderWater = gui.addFolder('Water');
+        // folderWater.add(waterUniforms.distortionScale, 'value', 0, 8, 0.1).name('distortionScale');
+        // folderWater.add(waterUniforms.size, 'value', 0.1, 10, 0.1).name('size');
+        // folderWater.open();
 
 
         const fighter = new Plane(Scene, 100, true, this.camera, false, x, z, uuid);
@@ -293,6 +382,9 @@ class GameBoard {
         // fighter.mesh.position.y = 0;
         // fighter.mesh.position.z = 800;
         Scene.add(fighter.mesh);
+
+        let look_at_position = fighter.mesh.position.clone().add(new THREE.Vector3(1,0,0));
+        reportPosition(fighter.mesh.position.x, fighter.mesh.position.y, fighter.mesh.position.z, look_at_position.x, look_at_position.y, look_at_position.z);
 
         // 向服务器请求当前玩家列表
         // requestMultiPlayers();

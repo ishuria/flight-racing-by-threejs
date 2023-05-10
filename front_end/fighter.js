@@ -10,8 +10,6 @@ import { reportPosition, reportBullet } from './websockets/websocket.js';
  */
 const PlaneHolder = []
 
-
-
 /**
  * 飞机
  * 用户控制的、ai控制的、其他用户控制的
@@ -36,7 +34,7 @@ class Plane {
       backward: false,
       leftward: false,
       rightward: false,
-      shoot:false,
+      shoot: false,
     };
 
 
@@ -103,8 +101,13 @@ class Plane {
 
     this.mesh.scale.set(.25, .25, .25);
 
+
+
     // 初始位置
     this.mesh.position.set(x, this.obit_height, z);
+
+    // 机身的相对朝向
+    this.respective_look_at_direction = new Vector3(0, 0, -1);
 
     PlaneHolder.push(this);
   }
@@ -140,22 +143,23 @@ class Plane {
       this.mesh.position.x += this.fighter_speed;
       is_position_changed = true;
     }
-    let look_point = get_look_at_direction(Controls, this.mesh.position);
-    if (look_point) {
-      this.mesh.lookAt(look_point.x,look_point.y,look_point.z);
-    }
+
+    this.respective_look_at_direction = get_shoot_direction(Controls, this.respective_look_at_direction);
+    let look_at_direction = get_look_at_direction(Controls, this.mesh.position, this.respective_look_at_direction);
+
+
+    this.mesh.lookAt(look_at_direction.x, look_at_direction.y, look_at_direction.z);
 
     if (Controls.shoot) {
       const currentDate = new Date();
       const timestamp = currentDate.getTime();
       if (this.last_shoot_timestamp == 0 || timestamp - this.last_shoot_timestamp >= this.shoot_cooldown * 1000) {
-        let bullet_direction = get_shoot_direction(Controls);
-        let b = new Bullet(this.mesh.position, bullet_direction, this.scene);
+        let b = new Bullet(this.mesh.position, this.respective_look_at_direction, this.scene);
         this.scene.add(b.mesh);
         BulletHolder.push(b);
         this.last_shoot_timestamp = timestamp;
-        if (GameMode === GameModeMulti){
-          reportBullet(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z, bullet_direction.x, bullet_direction.y, bullet_direction.z)
+        if (GameMode === GameModeMulti) {
+          reportBullet(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z, this.respective_look_at_direction.x, this.respective_look_at_direction.y, this.respective_look_at_direction.z)
         }
       }
     }
@@ -168,7 +172,7 @@ class Plane {
     this.camera.lookAt(this.mesh.position);
 
     if (GameMode === GameModeMulti && is_position_changed) {
-      reportPosition(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z, look_point.x,look_point.y,look_point.z);
+      reportPosition(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z, look_at_direction.x, look_at_direction.y, look_at_direction.z);
     }
   }
 
@@ -211,16 +215,16 @@ class Plane {
       const currentDate = new Date();
       const timestamp = currentDate.getTime();
       if (this.last_shoot_timestamp == 0 || timestamp - this.last_shoot_timestamp >= this.shoot_cooldown * 1000) {
-        let b = new Bullet(this.mesh.position, get_shoot_direction(this.ai_control), this.scene);
+        let b = new Bullet(this.mesh.position, get_shoot_direction(this.ai_control, this.respective_look_at_direction), this.scene);
         this.scene.add(b.mesh);
         BulletHolder.push(b);
         this.last_shoot_timestamp = timestamp;
       }
     }
 
-    let look_point = get_look_at_direction(this.ai_control, this.mesh.position);
+    let look_point = get_look_at_direction(this.ai_control, this.mesh.position, this.respective_look_at_direction);
     if (look_point) {
-      this.mesh.lookAt(look_point.x,look_point.y,look_point.z);
+      this.mesh.lookAt(look_point.x, look_point.y, look_point.z);
     }
 
     this.propeller.rotation.x += 0.3;
@@ -252,32 +256,32 @@ class Plane {
  * 根据飞机的移动方向决定子弹发射方向
  * @returns 
  */
-function get_shoot_direction(controls) {
+function get_shoot_direction(controls, respective_look_at_direction) {
   if (controls.forward && controls.leftward) {
     return new THREE.Vector4(-0.7, 0, -0.7)
   }
   if (controls.forward && controls.rightward) {
-    return new THREE.Vector4(0.7, 0, -0.7)
+    return new THREE.Vector3(0.7, 0, -0.7)
   }
   if (controls.forward) {
-    return new THREE.Vector4(0, 0, -1)
+    return new THREE.Vector3(0, 0, -1)
   }
   if (controls.backward && controls.leftward) {
-    return new THREE.Vector4(-0.7, 0, 0.7)
+    return new THREE.Vector3(-0.7, 0, 0.7)
   }
   if (controls.backward && controls.rightward) {
-    return new THREE.Vector4(0.7, 0, 0.7)
+    return new THREE.Vector3(0.7, 0, 0.7)
   }
   if (controls.backward) {
-    return new THREE.Vector4(0, 0, 1)
+    return new THREE.Vector3(0, 0, 1)
   }
   if (controls.leftward) {
-    return new THREE.Vector4(-1, 0, 0)
+    return new THREE.Vector3(-1, 0, 0)
   }
   if (controls.rightward) {
-    return new THREE.Vector4(1, 0, 0)
+    return new THREE.Vector3(1, 0, 0)
   }
-  return new THREE.Vector4(0, 0, -1)
+  return respective_look_at_direction;
 }
 
 
@@ -285,32 +289,36 @@ function get_shoot_direction(controls) {
  * 根据飞机的移动方向决定飞机朝向
  * @returns 
  */
-function get_look_at_direction(controls, position) {
+function get_look_at_direction(controls, position, respective_look_at_direction) {
   if (controls.forward && controls.leftward) {
-    return position.clone().add(new Vector3(1,0,-1));
+    return position.clone().add(new Vector3(1, 0, -1));
   }
   if (controls.forward && controls.rightward) {
-    return position.clone().add(new Vector3(1,0,1));
+    return position.clone().add(new Vector3(1, 0, 1));
   }
   if (controls.forward) {
-    return position.clone().add(new Vector3(1,0,0));
+    return position.clone().add(new Vector3(1, 0, 0));
   }
   if (controls.backward && controls.leftward) {
-    return position.clone().add(new Vector3(-1,0,-1));
+    return position.clone().add(new Vector3(-1, 0, -1));
   }
   if (controls.backward && controls.rightward) {
-    return position.clone().add(new Vector3(-1,0,1));
+    return position.clone().add(new Vector3(-1, 0, 1));
   }
   if (controls.backward) {
-    return position.clone().add(new Vector3(-1,0,0));
+    return position.clone().add(new Vector3(-1, 0, 0));
   }
   if (controls.leftward) {
-    return position.clone().add(new Vector3(0,0,-1));
+    return position.clone().add(new Vector3(0, 0, -1));
   }
   if (controls.rightward) {
-    return position.clone().add(new Vector3(0,0,1));
+    return position.clone().add(new Vector3(0, 0, 1));
   }
-  return null
+  var axis = new THREE.Vector3(0, 1, 0);
+  var angle = -Math.PI / 2;
+  let dump = respective_look_at_direction.clone()
+  dump.applyAxisAngle(axis, angle);
+  return position.clone().add(dump);
 }
 
 
