@@ -1,8 +1,9 @@
 import * as THREE from 'three';
 import { Vector3 } from 'three';
 import { Bullet, BulletHolder } from './bullet.js';
-import { Colors, MapSize } from './consts.js';
+import { Colors, GameMode, GameModeMulti, MapSize } from './consts.js';
 import { Controls } from './consts.js';
+import { reportPosition, reportBullet } from './websockets/websocket.js';
 
 /**
  * 保存场景里所有飞机记录
@@ -16,7 +17,8 @@ const PlaneHolder = []
  * 用户控制的、ai控制的、其他用户控制的
  */
 class Plane {
-  constructor(scene, obit_height, is_user_control, camera, is_ai_control) {
+  constructor(scene, obit_height, is_user_control, camera, is_ai_control, x, z, uuid) {
+    this.uuid = uuid;
     this.scene = scene;
     this.camera = camera;
     this.obit_height = obit_height;
@@ -101,10 +103,8 @@ class Plane {
 
     this.mesh.scale.set(.25, .25, .25);
 
-    // 随机初始位置
-    this.mesh.position.set(0, this.obit_height, 0);
-
-    this.update();
+    // 初始位置
+    this.mesh.position.set(x, this.obit_height, z);
 
     PlaneHolder.push(this);
   }
@@ -112,39 +112,51 @@ class Plane {
   update() {
     if (this.is_user_control) {
       this.update_user();
+      return;
     }
     if (this.is_ai_control) {
       this.update_ai();
+      return;
     }
+    this.update_multi();
   }
 
   update_user() {
+    // 记录下位置是否有变更
+    let is_position_changed = false;
     if (Controls.forward) {
       this.mesh.position.z -= this.fighter_speed;
+      is_position_changed = true;
     }
     if (Controls.backward) {
       this.mesh.position.z += this.fighter_speed;
+      is_position_changed = true;
     }
     if (Controls.leftward) {
       this.mesh.position.x -= this.fighter_speed;
+      is_position_changed = true;
     }
     if (Controls.rightward) {
       this.mesh.position.x += this.fighter_speed;
+      is_position_changed = true;
     }
     let look_point = get_look_at_direction(Controls, this.mesh.position);
     if (look_point) {
       this.mesh.lookAt(look_point.x,look_point.y,look_point.z);
     }
-    
 
     if (Controls.shoot) {
       const currentDate = new Date();
       const timestamp = currentDate.getTime();
       if (this.last_shoot_timestamp == 0 || timestamp - this.last_shoot_timestamp >= this.shoot_cooldown * 1000) {
-        let b = new Bullet(this.mesh.position, get_shoot_direction(Controls), this.scene);
+        let bullet_direction = get_shoot_direction(Controls);
+        let b = new Bullet(this.mesh.position, bullet_direction, this.scene);
         this.scene.add(b.mesh);
         BulletHolder.push(b);
         this.last_shoot_timestamp = timestamp;
+        if (GameMode === GameModeMulti){
+          reportBullet(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z, bullet_direction.x, bullet_direction.y, bullet_direction.z)
+        }
       }
     }
     // this.mesh.position.x += 1;
@@ -154,6 +166,10 @@ class Plane {
     this.camera.position.y = this.mesh.position.y + 200;
     this.camera.position.z = this.mesh.position.z + 200;
     this.camera.lookAt(this.mesh.position);
+
+    if (GameMode === GameModeMulti && is_position_changed) {
+      reportPosition(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z, look_point.x,look_point.y,look_point.z);
+    }
   }
 
   update_ai() {
@@ -207,6 +223,11 @@ class Plane {
       this.mesh.lookAt(look_point.x,look_point.y,look_point.z);
     }
 
+    this.propeller.rotation.x += 0.3;
+  }
+
+  update_multi() {
+    // this.mesh.position.x += 1;
     this.propeller.rotation.x += 0.3;
   }
 

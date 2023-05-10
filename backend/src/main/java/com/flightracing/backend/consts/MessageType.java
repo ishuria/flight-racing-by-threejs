@@ -5,4 +5,5 @@ public class MessageType {
     public static final String UUID = "uuid";
     public static final String PLAYER = "player";
     public static final String POSITION = "position";
+    public static final String BULLET = "bullet";
 }

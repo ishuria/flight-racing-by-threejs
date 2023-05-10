@@ -1,15 +1,12 @@
-import { GameBoard, GameBoardOption } from "./game_board";
+import { GameBoard } from "./game_board";
 import * as THREE from 'three';
 import { Controls, GameMode, GameModeMulti, SetGameMode } from "./consts";
 import { init } from "./websockets/websocket";
 
 
-// 创建场景，全局唯一
-const scene = new THREE.Scene();
-// 游戏选项
-const game_board_option = new GameBoardOption(scene);
+
 // 展示demo内容
-const game_board = new GameBoard(game_board_option);
+const game_board = new GameBoard();
 
 
 function build_ai_game_board() {
