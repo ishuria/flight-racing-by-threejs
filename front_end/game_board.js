@@ -4,11 +4,9 @@ import { Sky } from 'three/addons/objects/Sky.js';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { Plane, PlaneHolder } from './fighter.js';
 import { Sea } from './sea.js';
-import { Controls, GameMode, GameModeAI, GameModeDemo, Scene, } from './consts.js';
+import { Controls, GameMode, GameModeAI, GameModeDemo, Scene, SetMyFighter, } from './consts.js';
 import { BulletHolder } from './bullet.js';
 import { reportPosition, uuid } from './websockets/websocket.js';
-
-let animation_frame_id = 0;
 
 let water = null;
 
@@ -52,7 +50,7 @@ class GameBoard {
         }
 
         function animate() {
-            animation_frame_id = requestAnimationFrame(animate);
+            requestAnimationFrame(animate);
             PlaneHolder.forEach(e => e.update());
             BulletHolder.forEach(e => e.update());
             if (water) {
@@ -117,18 +115,76 @@ class GameBoard {
         Scene.add(shadowLight);
 
 
-        const sea = new Sea();
-        // push it a little bit at the bottom of the scene
-        sea.mesh.position.x = 0;
-        sea.mesh.position.y = 0;
-        sea.mesh.position.z = 0;
+        const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
 
-        // add the mesh of the sea to the scene
-        Scene.add(sea.mesh);
+        water = new Water(
+            waterGeometry,
+            {
+                textureWidth: 512,
+                textureHeight: 512,
+                waterNormals: new THREE.TextureLoader().load('textures/waternormals.jpg', function (texture) {
+
+                    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+
+                }),
+                sunDirection: new THREE.Vector3(),
+                sunColor: 0xffffff,
+                waterColor: 0x001e0f,
+                distortionScale: 3.7,
+                fog: Scene.fog !== undefined
+            }
+        );
+
+        water.rotation.x = - Math.PI / 2;
+
+        Scene.add(water);
+
+        const sky = new Sky();
+        sky.scale.setScalar(10000);
+        Scene.add(sky);
+
+        const skyUniforms = sky.material.uniforms;
+
+        skyUniforms['turbidity'].value = 10;
+        skyUniforms['rayleigh'].value = 2;
+        skyUniforms['mieCoefficient'].value = 0.005;
+        skyUniforms['mieDirectionalG'].value = 0.8;
+
+        const parameters = {
+            elevation: 2,
+            azimuth: 180
+        };
+
+        let sun = new THREE.Vector3();
+
+        const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
+        let renderTarget;
+
+        function updateSun() {
+
+            const phi = THREE.MathUtils.degToRad(90 - parameters.elevation);
+            const theta = THREE.MathUtils.degToRad(parameters.azimuth);
+
+            sun.setFromSphericalCoords(1, phi, theta);
+
+            sky.material.uniforms['sunPosition'].value.copy(sun);
+            water.material.uniforms['sunDirection'].value.copy(sun).normalize();
+
+            if (renderTarget !== undefined) renderTarget.dispose();
+
+            renderTarget = pmremGenerator.fromScene(sky);
+
+            Scene.environment = renderTarget.texture;
+
+        }
+
+        updateSun();
 
         // 创建四个ai控制的，先随机乱飞
         for (let index = 0; index < 10; index++) {
-            const ai_plane = new Plane(Scene, 100, false, this.camera, true);
+            let x = Math.floor((Math.random() * 100) + 1);
+            let z = Math.floor((Math.random() * 100) + 1);
+            const ai_plane = new Plane(Scene, 100, false, this.camera, true, x, z, "");
             Scene.add(ai_plane.mesh);
         }
 
@@ -223,21 +279,15 @@ class GameBoard {
         // scene.add( helper );
     }
 
-    async build_multi_game_board() {
+    build_multi_game_board() {
         // 清空地图
         BulletHolder.length = 0;
         PlaneHolder.length = 0;
-
-        await sleep(3000);
 
         // 随机一个坐标
         let x = Math.floor((Math.random() * 100) + 1);
         let z = Math.floor((Math.random() * 100) + 1);
 
-
-        while (Scene && Scene.children.length > 0) {
-            Scene.remove(Scene.children[0]);
-        }
         // Set the position of the camera
         this.camera.position.x = 200;
         this.camera.position.y = 200;
@@ -383,15 +433,10 @@ class GameBoard {
         // fighter.mesh.position.z = 800;
         Scene.add(fighter.mesh);
 
+        SetMyFighter(fighter);
+
         let look_at_position = fighter.mesh.position.clone().add(new THREE.Vector3(1,0,0));
         reportPosition(fighter.mesh.position.x, fighter.mesh.position.y, fighter.mesh.position.z, look_at_position.x, look_at_position.y, look_at_position.z);
-
-        // 向服务器请求当前玩家列表
-        // requestMultiPlayers();
-        // for (let index = 0; index < 4; index++) {
-        //     const ai_plane = new Plane(Scene, 100, false, this.camera, true);
-        //     Scene.add(ai_plane.mesh);
-        // }
 
         const axisHelper = new THREE.AxesHelper(5000);
         Scene.add(axisHelper);

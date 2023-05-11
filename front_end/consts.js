@@ -31,4 +31,18 @@ function SetGameMode(val) {
 // 创建场景，全局唯一
 const Scene = new THREE.Scene();
 
-export { Colors, Controls, MapSize, GameMode, GameModeDemo, GameModeAI, GameModeMulti, SetGameMode, Scene };
+let MyFighter = null;
+function SetMyFighter(newMyFighter) {
+	MyFighter = newMyFighter;
+}
+
+function clear_info() {
+	document.querySelector('.semi-transparent-info').innerHTML = '';
+}
+
+export {
+	Colors, Controls, MapSize, GameMode, SetGameMode,
+	GameModeDemo, GameModeAI, GameModeMulti, Scene,
+	MyFighter, SetMyFighter,
+	clear_info
+};

@@ -3,17 +3,22 @@ import { Scene } from "../consts";
 import { Bullet, BulletHolder } from "../bullet";
 import { Plane, PlaneHolder } from "../fighter";
 import * as THREE from 'three';
+import { game_board } from "../main";
 
 let uuid = "";
 let Socket = null;
 
-function init() {
+function init_websocket() {
   // Create WebSocket connection.
   Socket = new WebSocket("ws://localhost:8027/web3d/ws");
 
   // Connection opened
   Socket.addEventListener("open", (event) => {
     // socket.send("Hello Server!");
+    document.querySelector('.semi-transparent-info').innerHTML = 'Connect server success';
+    setTimeout(() => {
+      document.querySelector('.semi-transparent-info').innerHTML = 'Waiting for dispatching uuid...';
+    }, 1000);
   });
 
   // Listen for messages
@@ -21,7 +26,7 @@ function init() {
 }
 
 let messageHandler = function (event) {
-  console.log("Message from server ", event);
+  // console.log("Message from server ", event);
   let data = JSON.parse(event.data)
   switch (data.message_type) {
     case 'ping':
@@ -50,15 +55,23 @@ let pingHandler = function (socket, data) {
 let uuidHandler = function (socket, data) {
   console.log('setting uuid: ' + data.uuid);
   uuid = data.uuid;
+  game_board.build_multi_game_board();
+  setTimeout(() => {
+    document.querySelector('.semi-transparent-info').innerHTML = 'Successfully get uuid from server';
+  }, 1000);
+  setTimeout(() => {
+    document.querySelector('.semi-transparent-info').innerHTML = '';
+  }, 2000);
 }
 
 let bulletHandler = function (socket, data) {
     // 把服务器下发的玩家坐标列表和本地的对比
     let bullet = JSON.parse(data.text)
     if (bullet.uuid === uuid){
+      // 是自己生成的子弹，不处理
       return;
     }
-    let b = new Bullet(new THREE.Vector3( bullet.x, bullet.y, bullet.z ), new THREE.Vector3( bullet.direction_x, bullet.direction_y, bullet.direction_z ), Scene);
+    let b = new Bullet(new THREE.Vector3( bullet.x, bullet.y, bullet.z ), new THREE.Vector3( bullet.direction_x, bullet.direction_y, bullet.direction_z ), bullet.uuid);
     Scene.add(b.mesh);
     BulletHolder.push(b);
 }
@@ -95,7 +108,7 @@ let playerHandler = function (socket, data) {
     if (!isInPlaneHolder) {
       let new_plane = new Plane(myPlane.scene, 100, false, myPlane.camera, false, player.x, player.z, player.uuid);
       PlaneHolder.push(new_plane);
-      myPlane.scene.add(new_plane.mesh);
+      Scene.add(new_plane.mesh);
     }
   });
 
@@ -110,13 +123,13 @@ let reportPosition = function (x, y, z, look_at_x, look_at_y, look_at_z) {
   Socket.send(JSON.stringify(message))
 }
 
-let reportBullet = function (x, y, z, direction_x, direction_y, direction_z) {
+let reportBullet = function (x, y, z, direction_x, direction_y, direction_z, bullet_uuid) {
   let message = {
     "message_type": "bullet",
     "uuid": uuid,
-    "text": JSON.stringify({ "x": x, "y": y, "z": z, "direction_x": direction_x, "direction_y": direction_y, "direction_z": direction_z, "uuid": uuid }),
+    "text": JSON.stringify({ "x": x, "y": y, "z": z, "direction_x": direction_x, "direction_y": direction_y, "direction_z": direction_z, "uuid": bullet_uuid }),
   }
   Socket.send(JSON.stringify(message))
 }
 
-export { init, reportPosition, uuid, reportBullet };
+export { init_websocket, reportPosition, uuid, reportBullet };

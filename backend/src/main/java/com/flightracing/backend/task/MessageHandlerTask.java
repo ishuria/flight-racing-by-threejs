@@ -36,7 +36,7 @@ public class MessageHandlerTask implements Runnable {
                 handlePosition();
                 break;
             }
-            case MessageType.BULLET:{
+            case MessageType.BULLET: {
                 handleBullet();
                 break;
             }
@@ -44,7 +44,7 @@ public class MessageHandlerTask implements Runnable {
         }
     }
 
-    public void handlePosition(){
+    public void handlePosition() {
         if (userMessage.getUuid() == null) {
             return;
         }
@@ -87,21 +87,12 @@ public class MessageHandlerTask implements Runnable {
 
     // 下发新的子弹创建消息
     // 不用标记子弹来自谁，自己是追不上自己的子弹的
-    public void handleBullet(){
+    public void handleBullet() {
         UserMessage bulletMessage = new UserMessage(MessageType.BULLET);
         bulletMessage.setUuid(userMessage.getUuid());
-        try {
-            Bullet b = UserMessage.messageMapper.readValue(userMessage.getText(), Bullet.class);
-            ConnectionManager.connectionStorage.forEach((uuid, c) -> {
-                try {
-                    bulletMessage.setText(UserMessage.messageMapper.writeValueAsString(b));
-                    ConnectionManager.sendMessage(uuid, bulletMessage);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
+        ConnectionManager.connectionStorage.forEach((uuid, c) -> {
+            bulletMessage.setText(userMessage.getText());
+            ConnectionManager.sendMessage(uuid, bulletMessage);
+        });
     }
 }

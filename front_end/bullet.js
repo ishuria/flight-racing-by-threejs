@@ -1,11 +1,13 @@
 import * as THREE from 'three';
-import { Colors, MapSize } from './consts.js';
+import { Colors, GameMode, GameModeMulti, MapSize, MyFighter, Scene, SetMyFighter } from './consts.js';
+import { PlaneHolder } from './fighter.js';
+import { reportPosition } from './websockets/websocket.js';
 
 const BulletHolder = []
 
 class Bullet {
-  constructor(position, direction, scene) {
-    this.scene = scene;
+  constructor(position, direction, uuid) {
+    this.uuid = uuid;
     this.bullet_speed = 10;
     this.direction = direction;
     // create a cube geometry;
@@ -14,7 +16,7 @@ class Bullet {
 
     // create a material; a simple white material will do the trick
     var mat = new THREE.MeshPhongMaterial({
-      color: Colors.brown,
+      color: Colors.white,
     });
     // create the mesh by cloning the geometry
     var mesh = new THREE.Mesh(geom, mat);
@@ -40,7 +42,7 @@ class Bullet {
     this.mesh.position.z += this.direction.z * this.bullet_speed;
     // 子弹越界后从内存中消除
     if (Math.abs(this.mesh.position.x) > MapSize / 2 || Math.abs(this.mesh.position.z) > MapSize / 2){
-      this.scene.remove(this.mesh);
+      Scene.remove(this.mesh);
       this.mesh.geometry.dispose();
       this.mesh.material.dispose();
       var index = BulletHolder.indexOf(this.mesh);
@@ -49,8 +51,36 @@ class Bullet {
       }
     }
     // 子弹检测命中
-    
+    // 仅检测自机与子弹的碰撞
+    if (MyFighter && !MyFighter.is_hit && MyFighter.mesh.position.distanceTo(this.mesh.position) <= 25 && this.uuid != MyFighter.uuid){
+        console.log('you were hit');
+        // document.querySelector('.semi-transparent-info')
+        post_hit(3);
+        MyFighter.is_hit = true;
+    }
   }
+}
+
+function post_hit(count_down_seconds){
+  document.querySelector('.semi-transparent-info').innerHTML = 'You were hit. Wait for '+ count_down_seconds + ' seconds to rejoin the game.';
+  if (count_down_seconds === 0){
+    document.querySelector('.semi-transparent-info').innerHTML = '';
+    // 重建自机
+    MyFighter.is_hit = false;
+    let x = Math.floor((Math.random() * 100) + 1);
+            let z = Math.floor((Math.random() * 100) + 1);
+    MyFighter.mesh.position.x = x;
+    MyFighter.mesh.position.z = z;
+
+    if (GameMode === GameModeMulti) {
+      let look_at = MyFighter.mesh.position.clone().add(new THREE.Vector3(1,0,0))
+      reportPosition(MyFighter.mesh.position.x, MyFighter.mesh.position.y, MyFighter.mesh.position.z, 
+        look_at.x, look_at.y, look_at.z);
+    }
+
+    return;
+  }
+  setTimeout(post_hit.bind(null, count_down_seconds-1), 1000);
 }
 
 export {Bullet, BulletHolder};

@@ -4,7 +4,10 @@ import { Bullet, BulletHolder } from './bullet.js';
 import { Colors, GameMode, GameModeMulti, MapSize } from './consts.js';
 import { Controls } from './consts.js';
 import { reportPosition, reportBullet } from './websockets/websocket.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+// Instantiate a loader
+const loader = new GLTFLoader();
 /**
  * 保存场景里所有飞机记录
  */
@@ -16,6 +19,7 @@ const PlaneHolder = []
  */
 class Plane {
   constructor(scene, obit_height, is_user_control, camera, is_ai_control, x, z, uuid) {
+    this.is_hit = false;
     this.uuid = uuid;
     this.scene = scene;
     this.camera = camera;
@@ -43,6 +47,34 @@ class Plane {
     this.shoot_cooldown = 0.1;
     this.last_shoot_timestamp = 0;
 
+
+    // let fighter;
+    // // Load a glTF resource
+    // loader.load(
+    //   // resource URL
+    //   './assets/F-16.glb',
+    //   // called when the resource is loaded
+    //   function (gltf) {
+    //     console.log(gltf)
+    //     fighter = gltf.scene.children[0];
+    //     // gltf.scene.position.x = 0;
+    //     // gltf.scene.position.y = 100;
+    //     // gltf.scene.position.z = 0;
+    //     // gltf.scene.scale.set(10, 10, 10);
+    //     fighter.scale.set(10, 10, 10);
+    //     // 初始位置
+    //     fighter.position.set(x, 100, z);
+    //   },
+    //   // called while loading is progressing
+    //   function (xhr) {
+    //     console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+    //   },
+    //   // called when loading has errors
+    //   function (error) {
+    //     console.log('An error happened');
+    //   }
+    // );
+    // this.mesh = fighter;
 
     this.mesh = new THREE.Object3D();
 
@@ -125,6 +157,9 @@ class Plane {
   }
 
   update_user() {
+    if (this.is_hit) {
+      return;
+    }
     // 记录下位置是否有变更
     let is_position_changed = false;
     if (Controls.forward) {
@@ -147,19 +182,20 @@ class Plane {
     this.respective_look_at_direction = get_shoot_direction(Controls, this.respective_look_at_direction);
     let look_at_direction = get_look_at_direction(Controls, this.mesh.position, this.respective_look_at_direction);
 
-
     this.mesh.lookAt(look_at_direction.x, look_at_direction.y, look_at_direction.z);
 
     if (Controls.shoot) {
       const currentDate = new Date();
       const timestamp = currentDate.getTime();
       if (this.last_shoot_timestamp == 0 || timestamp - this.last_shoot_timestamp >= this.shoot_cooldown * 1000) {
-        let b = new Bullet(this.mesh.position, this.respective_look_at_direction, this.scene);
+        let b = new Bullet(this.mesh.position, this.respective_look_at_direction, this.uuid);
         this.scene.add(b.mesh);
         BulletHolder.push(b);
         this.last_shoot_timestamp = timestamp;
         if (GameMode === GameModeMulti) {
-          reportBullet(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z, this.respective_look_at_direction.x, this.respective_look_at_direction.y, this.respective_look_at_direction.z)
+          reportBullet(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z, 
+            this.respective_look_at_direction.x, this.respective_look_at_direction.y, this.respective_look_at_direction.z,
+            this.uuid);
         }
       }
     }
@@ -258,7 +294,7 @@ class Plane {
  */
 function get_shoot_direction(controls, respective_look_at_direction) {
   if (controls.forward && controls.leftward) {
-    return new THREE.Vector4(-0.7, 0, -0.7)
+    return new THREE.Vector3(-0.7, 0, -0.7)
   }
   if (controls.forward && controls.rightward) {
     return new THREE.Vector3(0.7, 0, -0.7)
