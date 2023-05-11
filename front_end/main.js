@@ -1,9 +1,7 @@
 import { GameBoard } from "./game_board";
 import * as THREE from 'three';
-import { Controls, GameMode, GameModeMulti, SetGameMode } from "./consts";
-import { init } from "./websockets/websocket";
-
-
+import { Controls, GameMode, GameModeMulti, Scene, SetGameMode } from "./consts";
+import { init_websocket } from "./websockets/websocket";
 
 // 展示demo内容
 const game_board = new GameBoard();
@@ -14,18 +12,21 @@ function build_ai_game_board() {
   // hide buttons
   document.querySelector('.semi-transparent-button-left').style.display = 'none';
   document.querySelector('.semi-transparent-button-right').style.display = 'none';
-  document.querySelector('.semi-transparent-info').style.display = 'block';
+  document.querySelector('.semi-transparent-hint').style.display = 'block';
 }
 
 function build_multi_game_board() {
+  while (Scene && Scene.children.length > 0) {
+    Scene.remove(Scene.children[0]);
+  }
   SetGameMode(GameModeMulti);
-  // 连接websocket
-  init();
-  game_board.build_multi_game_board();
   // hide buttons
   document.querySelector('.semi-transparent-button-left').style.display = 'none';
   document.querySelector('.semi-transparent-button-right').style.display = 'none';
-  document.querySelector('.semi-transparent-info').style.display = 'block';
+  document.querySelector('.semi-transparent-hint').style.display = 'block';
+  document.querySelector('.semi-transparent-info').innerHTML = 'Connecting Server...';
+  // 连接websocket
+  init_websocket(game_board);
 }
 
 document.querySelector('.semi-transparent-button-left').addEventListener('click', build_ai_game_board);
@@ -45,11 +46,11 @@ function onDocumentKeyDown(event) {
     Controls.rightward = true;
   } else if (keyCode == 74) {
     Controls.shoot = true;
-  } else if (keyCode == 82) {
+  } else if (keyCode == 82) { // R
     game_board.build_demo_game_board();
     document.querySelector('.semi-transparent-button-left').style.display = 'block';
     document.querySelector('.semi-transparent-button-right').style.display = 'block';
-    document.querySelector('.semi-transparent-info').style.display = 'none';
+    document.querySelector('.semi-transparent-hint').style.display = 'none';
   }
 };
 
@@ -71,3 +72,5 @@ function onDocumentKeyUp(event) {
 
   }
 };
+
+export {game_board}

@@ -64,11 +64,11 @@
       transition: all 0.3s ease-out;
     }
 
-    .semi-transparent-info {
+    .semi-transparent-hint {
       position: absolute;
       display: none;
-      top: 10%;
-      left: 50%;
+      top: 5%;
+      left: 8%;
       margin-right: -50%;
       transform: translate(-50%, -50%);
       box-sizing: border-box;
@@ -86,6 +86,59 @@
       letter-spacing: 1px;
       transition: all 0.3s ease-out;
     }
+
+    .semi-transparent-info {
+      position: absolute;
+      display: block;
+      top: 5%;
+      left: 50%;
+      margin-right: -50%;
+      transform: translate(-50%, -50%);
+      box-sizing: border-box;
+      margin: 0 auto;
+      padding: 8px;
+      width: 80%;
+      max-width: 500px;
+      background: #fff;
+      /* fallback color for old browsers */
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      color: #fff;
+      text-align: center;
+      text-decoration: none;
+      letter-spacing: 1px;
+      transition: all 0.3s ease-out;
+    }
+
+    .semi-transparent-name {
+      position: absolute;
+      display: block;
+      top: 10%;
+      left: 50%;
+      margin-right: -50%;
+      transform: translate(-50%, -50%);
+      box-sizing: border-box;
+      margin: 0 auto;
+      padding: 8px;
+      width: 80%;
+      max-width: 250px;
+      background: #fff;
+      /* fallback color for old browsers */
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      color: #fff;
+      text-align: center;
+      text-decoration: none;
+      letter-spacing: 1px;
+      transition: all 0.3s ease-out;
+    }
+
+    ::placeholder {
+      /* Chrome, Firefox, Opera, Safari 10.1+ */
+      color: #fff;
+      opacity: 1;
+      /* Firefox */
+    }
   </style>
   <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
 
@@ -101,7 +154,9 @@
 
 <body>
   <div id="info"></div>
-  <a class="semi-transparent-info" href="#">Press 'R' to return</a>
+  <a class="semi-transparent-info" href="#">Welcome</a>
+  <input class="semi-transparent-name" href="#" placeholder="Please Enter Your Pilot Name"></input>
+  <a class="semi-transparent-hint" href="#">Press 'R' to return</a>
   <a class="semi-transparent-button-left" href="#">Play with AI</a>
   <a class="semi-transparent-button-right" href="#">Play with others</a>
   <script type="module" src="/main.js"></script>
