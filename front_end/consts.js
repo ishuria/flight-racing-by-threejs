@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 
+// 预定义颜色
 const Colors = {
 	red: 0xf25346,
 	white: 0xd8d0d1,
@@ -9,6 +10,7 @@ const Colors = {
 	blue: 0x68c3c0,
 };
 
+// 游戏控制器
 const Controls = {
 	forward: false,
 	backward: false,
@@ -17,11 +19,16 @@ const Controls = {
 	shoot: false
 }
 
-const MapSize = 5000
+// 地图大小
+const MapSize = 10000
 
+// 游戏模式
 let GameMode = "demo"
+// 演示模式
 const GameModeDemo = "demo"
+// 人机对战
 const GameModeAI = "ai"
+// 联机对战
 const GameModeMulti = "multi"
 
 function SetGameMode(val) {
