@@ -10,7 +10,7 @@ let Socket = null;
 
 function init_websocket() {
   // Create WebSocket connection.
-  Socket = new WebSocket("ws://localhost:8027/web3d/ws");
+  Socket = new WebSocket("ws://106.14.121.124/web3d/ws");
 
   // Connection opened
   Socket.addEventListener("open", (event) => {
