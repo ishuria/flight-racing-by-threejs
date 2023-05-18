@@ -251,7 +251,7 @@ class Plane {
       const currentDate = new Date();
       const timestamp = currentDate.getTime();
       if (this.last_shoot_timestamp == 0 || timestamp - this.last_shoot_timestamp >= this.shoot_cooldown * 1000) {
-        let b = new Bullet(this.mesh.position, get_shoot_direction(this.ai_control, this.respective_look_at_direction), this.scene);
+        let b = new Bullet(this.mesh.position, get_shoot_direction(this.ai_control, this.respective_look_at_direction), this.uuid);
         this.scene.add(b.mesh);
         BulletHolder.push(b);
         this.last_shoot_timestamp = timestamp;

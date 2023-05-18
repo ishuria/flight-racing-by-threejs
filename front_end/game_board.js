@@ -182,9 +182,9 @@ class GameBoard {
 
         // 创建四个ai控制的，先随机乱飞
         for (let index = 0; index < 10; index++) {
-            let x = Math.floor((Math.random() * MapSize / 2) + 1);
-            let z = Math.floor((Math.random() * MapSize / 2) + 1);
-            const ai_plane = new Plane(Scene, 100, false, this.camera, true, x, z, "");
+            let x = Math.floor((Math.random() * (MapSize / 2)) + 1);
+            let z = Math.floor((Math.random() * (MapSize / 2)) + 1);
+            const ai_plane = new Plane(Scene, 100, false, this.camera, true, x, z, "ai_" + index);
             Scene.add(ai_plane.mesh);
         }
 
@@ -333,7 +333,7 @@ class GameBoard {
         // folderWater.open();
 
 
-        const fighter = new Plane(Scene, 100, true, this.camera, false, x, z, uuid);
+        const fighter = new Plane(Scene, 100, true, this.camera, false, x, z, "ai_self");
         // fighter.mesh.scale.set(.25,.25,.25);
         // fighter.mesh.position.x = 0;
         // fighter.mesh.position.y = 0;
@@ -344,8 +344,10 @@ class GameBoard {
 
 
         // 创建四个ai控制的，先随机乱飞
-        for (let index = 0; index < 4; index++) {
-            const ai_plane = new Plane(Scene, 100, false, this.camera, true);
+        for (let index = 0; index < 10; index++) {
+            let x = Math.floor((Math.random() * (MapSize / 2)) + 1);
+            let z = Math.floor((Math.random() * (MapSize / 2)) + 1);
+            const ai_plane = new Plane(Scene, 100, false, this.camera, true, x, z, "ai_" + index);
             Scene.add(ai_plane.mesh);
         }
 
@@ -422,7 +424,7 @@ class GameBoard {
         // // add the mesh of the sea to the scene
         // Scene.add(sea.mesh);
 
-        const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
+        const waterGeometry = new THREE.PlaneGeometry(MapSize * 100, MapSize * 100);
 
         water = new Water(
             waterGeometry,
@@ -512,7 +514,7 @@ class GameBoard {
 
         SetMyFighter(fighter);
 
-        let look_at_position = fighter.mesh.position.clone().add(new THREE.Vector3(1,0,0));
+        let look_at_position = fighter.mesh.position.clone().add(new THREE.Vector3(1, 0, 0));
         reportPosition(fighter.mesh.position.x, fighter.mesh.position.y, fighter.mesh.position.z, look_at_position.x, look_at_position.y, look_at_position.z);
 
         // const axisHelper = new THREE.AxesHelper(5000);

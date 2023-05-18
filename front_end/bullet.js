@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Colors, GameMode, GameModeMulti, MapSize, MyFighter, Scene, SetMyFighter } from './consts.js';
+import { Colors, GameMode, GameModeAI, GameModeMulti, MapSize, MyFighter, Scene, SetMyFighter } from './consts.js';
 import { PlaneHolder } from './fighter.js';
 import { reportPosition } from './websockets/websocket.js';
 
@@ -48,10 +48,12 @@ class Bullet {
       var index = BulletHolder.indexOf(this.mesh);
       if (index > -1) {
         BulletHolder.splice(index, 1);
+        Scene.remove(this.mesh);
+        return;
       }
     }
     // 子弹检测命中
-    // 仅检测自机与子弹的碰撞
+    // 检测自机与子弹的碰撞
     if (MyFighter && !MyFighter.is_hit && MyFighter.mesh.position.distanceTo(this.mesh.position) <= 25 && this.uuid != MyFighter.uuid) {
       console.log('you were hit');
       // document.querySelector('.semi-transparent-info')
@@ -59,6 +61,21 @@ class Bullet {
       MyFighter.is_hit = true;
       // remove mesh from scene
       Scene.remove(MyFighter.mesh);
+    }
+    // 检测ai游戏中，自机子弹是否命中ai
+    if (GameMode === GameModeAI){
+      let needRemoveIndex = [];
+      for (let fighterIndex = 0; fighterIndex < PlaneHolder.length; fighterIndex++) {
+        const fighter = PlaneHolder[fighterIndex];
+        if (fighter && !fighter.is_hit && fighter.mesh.position.distanceTo(this.mesh.position) <= 25 && this.uuid != fighter.uuid) {
+          fighter.is_hit = true;
+          Scene.remove(fighter.mesh);
+          needRemoveIndex.push(fighterIndex);
+        }
+      }
+      for (var i = needRemoveIndex.length -1; i >= 0; i--) {
+        PlaneHolder.splice(needRemoveIndex[i],1);
+      }
     }
   }
 }
@@ -69,8 +86,8 @@ function post_hit(count_down_seconds) {
     document.querySelector('.semi-transparent-info').innerHTML = '';
     // 重建自机
     MyFighter.is_hit = false;
-    let x = Math.floor((Math.random() * MapSize) + 1);
-    let z = Math.floor((Math.random() * MapSize) + 1);
+    let x = Math.floor((Math.random() * (MapSize / 2)) + 1);
+    let z = Math.floor((Math.random() * (MapSize / 2)) + 1);
     MyFighter.mesh.position.x = x;
     MyFighter.mesh.position.z = z;
     Scene.add(MyFighter.mesh);

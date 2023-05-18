@@ -1,6 +1,6 @@
 import { GameBoard } from "./game_board";
 import * as THREE from 'three';
-import { Controls, GameMode, GameModeMulti, Scene, SetGameMode } from "./consts";
+import { Controls, GameMode, GameModeAI, GameModeMulti, Scene, SetGameMode } from "./consts";
 import { init_websocket } from "./websockets/websocket";
 
 // 展示demo内容
@@ -9,6 +9,7 @@ const game_board = new GameBoard();
 
 function build_ai_game_board() {
   game_board.build_ai_game_board();
+  SetGameMode(GameModeAI);
   // hide buttons
   document.querySelector('.semi-transparent-button-left').style.display = 'none';
   document.querySelector('.semi-transparent-button-right').style.display = 'none';
