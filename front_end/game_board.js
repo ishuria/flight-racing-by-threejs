@@ -125,7 +125,7 @@ class GameBoard {
         Scene.add(shadowLight);
 
 
-        const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
+        const waterGeometry = new THREE.PlaneGeometry(MapSize, MapSize);
 
         water = new Water(
             waterGeometry,
@@ -262,7 +262,7 @@ class GameBoard {
 
 
 
-        const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
+        const waterGeometry = new THREE.PlaneGeometry(MapSize, MapSize);
 
         water = new Water(
             waterGeometry,
@@ -434,7 +434,7 @@ class GameBoard {
         // // add the mesh of the sea to the scene
         // Scene.add(sea.mesh);
 
-        const waterGeometry = new THREE.PlaneGeometry(MapSize * 100, MapSize * 100);
+        const waterGeometry = new THREE.PlaneGeometry(MapSize, MapSize);
 
         water = new Water(
             waterGeometry,

@@ -144,6 +144,10 @@ class Plane {
     PlaneHolder.push(this);
   }
 
+  /**
+   * 每帧更新飞机信息
+   * @returns 
+   */
   update() {
     if (this.is_user_control) {
       this.update_user();
