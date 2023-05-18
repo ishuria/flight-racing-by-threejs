@@ -5,7 +5,16 @@ import { reportPosition } from './websockets/websocket.js';
 
 const BulletHolder = []
 
+/**
+ * 子弹类
+ */
 class Bullet {
+  /**
+   * 构造函数
+   * @param {*} position 
+   * @param {*} direction 
+   * @param {*} uuid 
+   */
   constructor(position, direction, uuid) {
     this.uuid = uuid;
     this.bullet_speed = 10;
@@ -36,6 +45,11 @@ class Bullet {
     // mesh.receiveShadow = true;
     this.mesh = mesh;
   }
+
+  /**
+   * 每帧子弹信息更新函数
+   * @returns 
+   */
   update() {
     this.mesh.position.x += this.direction.x * this.bullet_speed;
     this.mesh.position.y += this.direction.y * this.bullet_speed;

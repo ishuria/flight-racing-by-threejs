@@ -8,25 +8,31 @@ import { game_board } from "../main";
 let uuid = "";
 let Socket = null;
 
+/**
+ * 初始化WebSocket连接
+ */
 function init_websocket() {
   // Create WebSocket connection.
   Socket = new WebSocket("ws://106.14.121.124/web3d/ws");
 
-  // Connection opened
+  // 添加事件处理函数
+  // WebSocket open事件
   Socket.addEventListener("open", (event) => {
-    // socket.send("Hello Server!");
     document.querySelector('.semi-transparent-info').innerHTML = 'Connect server success';
     setTimeout(() => {
       document.querySelector('.semi-transparent-info').innerHTML = 'Waiting for dispatching uuid...';
     }, 1000);
   });
 
-  // Listen for messages
+  // WebSocket 消息事件
   Socket.addEventListener("message", messageHandler);
 }
 
-let messageHandler = function (event) {
-  // console.log("Message from server ", event);
+/**
+ * WebSocket 消息事件处理函数
+ * @param {*} event 
+ */
+const messageHandler = function (event) {
   let data = JSON.parse(event.data)
   switch (data.message_type) {
     case 'ping':
@@ -46,13 +52,23 @@ let messageHandler = function (event) {
   }
 }
 
-let pingHandler = function (socket, data) {
+/**
+ * 处理ping事件
+ * @param {*} socket 
+ * @param {*} data 
+ */
+const pingHandler = function (socket, data) {
   socket.send(JSON.stringify({
     "message_type": "pong",
   }));
 }
 
-let uuidHandler = function (socket, data) {
+/**
+ * 处理服务器下发uuid事件
+ * @param {*} socket 
+ * @param {*} data 
+ */
+const uuidHandler = function (socket, data) {
   console.log('setting uuid: ' + data.uuid);
   uuid = data.uuid;
   game_board.build_multi_game_board();
@@ -64,7 +80,13 @@ let uuidHandler = function (socket, data) {
   }, 2000);
 }
 
-let bulletHandler = function (socket, data) {
+/**
+ * 处理其他玩家射击事件
+ * @param {*} socket 
+ * @param {*} data 
+ * @returns 
+ */
+const bulletHandler = function (socket, data) {
     // 把服务器下发的玩家坐标列表和本地的对比
     let bullet = JSON.parse(data.text)
     if (bullet.uuid === uuid){
@@ -76,7 +98,13 @@ let bulletHandler = function (socket, data) {
     BulletHolder.push(b);
 }
 
-let playerHandler = function (socket, data) {
+/**
+ * 处理其他玩家位置变更事件
+ * @param {*} socket 
+ * @param {*} data 
+ * @returns 
+ */
+const playerHandler = function (socket, data) {
   // 把服务器下发的玩家坐标列表和本地的对比
   let players = JSON.parse(data.text)
   // 找到我自己
@@ -114,7 +142,16 @@ let playerHandler = function (socket, data) {
 
 }
 
-let reportPosition = function (x, y, z, look_at_x, look_at_y, look_at_z) {
+/**
+ * 上报自机位置变更事件
+ * @param {*} x 
+ * @param {*} y 
+ * @param {*} z 
+ * @param {*} look_at_x 
+ * @param {*} look_at_y 
+ * @param {*} look_at_z 
+ */
+const reportPosition = function (x, y, z, look_at_x, look_at_y, look_at_z) {
   let message = {
     "message_type": "position",
     "uuid": uuid,
@@ -123,7 +160,17 @@ let reportPosition = function (x, y, z, look_at_x, look_at_y, look_at_z) {
   Socket.send(JSON.stringify(message))
 }
 
-let reportBullet = function (x, y, z, direction_x, direction_y, direction_z, bullet_uuid) {
+/**
+ * 上报射击事件
+ * @param {*} x 
+ * @param {*} y 
+ * @param {*} z 
+ * @param {*} direction_x 
+ * @param {*} direction_y 
+ * @param {*} direction_z 
+ * @param {*} bullet_uuid 
+ */
+const reportBullet = function (x, y, z, direction_x, direction_y, direction_z, bullet_uuid) {
   let message = {
     "message_type": "bullet",
     "uuid": uuid,
