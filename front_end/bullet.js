@@ -45,12 +45,7 @@ class Bullet {
       Scene.remove(this.mesh);
       this.mesh.geometry.dispose();
       this.mesh.material.dispose();
-      var index = BulletHolder.indexOf(this.mesh);
-      if (index > -1) {
-        BulletHolder.splice(index, 1);
-        Scene.remove(this.mesh);
-        return;
-      }
+      return true;
     }
     // 子弹检测命中
     // 检测自机与子弹的碰撞
@@ -77,6 +72,7 @@ class Bullet {
         PlaneHolder.splice(needRemoveIndex[i],1);
       }
     }
+    return false;
   }
 }
 

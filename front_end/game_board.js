@@ -52,10 +52,20 @@ class GameBoard {
         function animate() {
             requestAnimationFrame(animate);
             PlaneHolder.forEach(e => e.update());
-            BulletHolder.forEach(e => e.update());
+            let needRemoveBullet = [];
+            for (let index = 0; index < BulletHolder.length; index++) {
+                const needRemove = BulletHolder[index].update();
+                if (needRemove){
+                    needRemoveBullet.push(index);
+                }
+            }
+            for (var i = needRemoveBullet.length -1; i >= 0; i--) {
+                BulletHolder.splice(needRemoveBullet[i],1);
+              }
             if (water) {
                 water.material.uniforms['time'].value += 1.0 / 60.0;
             }
+            console.log("BulletHolder: " + BulletHolder.length);
             renderer.render(Scene, camera);
         }
         animate();
