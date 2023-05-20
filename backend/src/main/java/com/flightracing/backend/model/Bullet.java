@@ -2,18 +2,30 @@ package com.flightracing.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * 子弹类
+ */
 public class Bullet {
+    // 子弹x坐标
     private long x;
+    // 子弹y坐标
     private long y;
+    // 子弹z坐标
     private long z;
 
+    // 子弹方向向量的x值
     @JsonProperty("direction_x")
     private double directionX;
+
+    // 子弹方向向量的y值
     @JsonProperty("direction_y")
     private double directionY;
+
+    // 子弹方向向量的z值
     @JsonProperty("direction_z")
     private double directionZ;
 
+    // 子弹所属飞机的uuid
     private String uuid;
 
     public long getX() {

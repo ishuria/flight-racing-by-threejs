@@ -2,18 +2,32 @@ package com.flightracing.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * 玩家类
+ */
 public class Player {
+    // 玩家飞机的x坐标
     private long x;
+
+    // 玩家飞机的y坐标
     private long y;
+
+    // 玩家飞机的z坐标
     private long z;
 
+    // 玩家飞机方向向量的x值
     @JsonProperty("look_at_x")
     private long lookAtX;
+
+    // 玩家飞机方向向量的y值
     @JsonProperty("look_at_y")
     private long lookAtY;
+
+    // 玩家飞机方向向量的z值
     @JsonProperty("look_at_z")
     private long lookAtZ;
 
+    // 玩家飞机的uuid
     private String uuid;
 
     public long getX() {

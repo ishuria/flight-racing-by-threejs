@@ -16,7 +16,9 @@ import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-
+/**
+ * 定义WebSocket连接
+ */
 @ServerEndpoint("/ws")
 @Component
 public class WsServerEndpoint {

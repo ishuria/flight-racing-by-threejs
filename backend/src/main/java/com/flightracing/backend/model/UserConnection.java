@@ -3,6 +3,9 @@ package com.flightracing.backend.model;
 
 import javax.websocket.Session;
 
+/**
+ * 玩家连接的实体类
+ */
 public class UserConnection {
     // 本链接的唯一标识符
     private String uuid;

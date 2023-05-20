@@ -32,11 +32,12 @@ public class ConnectionManager {
 
     public static ConcurrentHashMap<String, UserConnection> connectionStorage;
 
-    private static ScheduledExecutorService heartbeatExecutorService;
-
+    /**
+     * 静态初始化
+     */
     static {
         connectionStorage = new ConcurrentHashMap<>(DEFAULT_STARTUP_CAPACITY);
-        heartbeatExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
+        ScheduledExecutorService heartbeatExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
             @Override
             public Thread newThread(Runnable r) {
                 return new Thread(r, "Thread-Heartbeat");
@@ -45,6 +46,10 @@ public class ConnectionManager {
         heartbeatExecutorService.scheduleWithFixedDelay(new HeartbeatTask(), 60, 120, TimeUnit.SECONDS);
     }
 
+    /**
+     * 处理新连接
+     * @param newConnection
+     */
     public static void onConnected(UserConnection newConnection) {
         if (newConnection == null) {
             return;
@@ -60,6 +65,10 @@ public class ConnectionManager {
         sendMessage(newConnection.getUuid(), uuidMessage);
     }
 
+    /**
+     * 处理连接断开
+     * @param uuid
+     */
     public static void abortConnection(String uuid) {
         if (uuid == null) {
             return;
@@ -70,6 +79,10 @@ public class ConnectionManager {
         connectionStorage.remove(uuid);
     }
 
+    /**
+     * 处理健康检查事件
+     * @param uuid
+     */
     public static void onHeartBeat(String uuid) {
         if (uuid == null) {
             return;
@@ -85,6 +98,11 @@ public class ConnectionManager {
         connectionToRefreshHeartBeat.setLastHeartbeatTimestamp(Instant.now().toEpochMilli());
     }
 
+    /**
+     * 处理服务器向客户端发送消息的事件
+     * @param uuid
+     * @param userMessage
+     */
     public static void sendMessage(String uuid, UserMessage userMessage) {
         if (uuid == null) {
             return;

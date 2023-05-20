@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.flightracing.backend.consts.Heartbeat;
 import com.flightracing.backend.consts.MessageType;
 import com.flightracing.backend.manager.ConnectionManager;
-import com.flightracing.backend.model.Bullet;
 import com.flightracing.backend.model.Player;
 import com.flightracing.backend.model.UserConnection;
 import com.flightracing.backend.model.UserMessage;
@@ -12,6 +11,9 @@ import com.flightracing.backend.model.UserMessage;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 消息处理类
+ */
 public class MessageHandlerTask implements Runnable {
     private UserMessage userMessage;
 

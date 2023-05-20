@@ -2,13 +2,15 @@ package com.flightracing.backend.task;
 
 import com.flightracing.backend.consts.Heartbeat;
 import com.flightracing.backend.manager.ConnectionManager;
-import com.flightracing.backend.model.UserConnection;
 import com.flightracing.backend.model.UserMessage;
 
 import javax.websocket.Session;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 健康检查定时任务
+ */
 public class HeartbeatTask implements Runnable {
 
     @Override
