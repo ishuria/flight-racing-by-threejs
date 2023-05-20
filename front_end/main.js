@@ -1,27 +1,31 @@
 import { GameBoard } from "./game_board";
-import * as THREE from 'three';
-import { Controls, GameMode, GameModeAI, GameModeMulti, Scene, SetGameMode } from "./consts";
+import { Controls, GameModeAI, GameModeMulti, Scene, SetGameMode } from "./consts";
 import { init_websocket } from "./websockets/websocket";
 
-// 展示demo内容
+// 游戏面板实例
 const game_board = new GameBoard();
 
-
+/**
+ * 创建AI对战界面
+ */
 function build_ai_game_board() {
   game_board.build_ai_game_board();
   SetGameMode(GameModeAI);
-  // hide buttons
+  // 隐藏按键及提示框
   document.querySelector('.semi-transparent-button-left').style.display = 'none';
   document.querySelector('.semi-transparent-button-right').style.display = 'none';
   document.querySelector('.semi-transparent-hint').style.display = 'block';
 }
 
+/**
+ * 创建联机对战界面
+ */
 function build_multi_game_board() {
   while (Scene && Scene.children.length > 0) {
     Scene.remove(Scene.children[0]);
   }
   SetGameMode(GameModeMulti);
-  // hide buttons
+  // 隐藏按键及提示框
   document.querySelector('.semi-transparent-button-left').style.display = 'none';
   document.querySelector('.semi-transparent-button-right').style.display = 'none';
   document.querySelector('.semi-transparent-hint').style.display = 'block';
@@ -33,19 +37,20 @@ function build_multi_game_board() {
 document.querySelector('.semi-transparent-button-left').addEventListener('click', build_ai_game_board);
 document.querySelector('.semi-transparent-button-right').addEventListener('click', build_multi_game_board);
 
+// 添加键盘按下事件
 window.addEventListener("keydown", onDocumentKeyDown, false);
 function onDocumentKeyDown(event) {
   var keyCode = event.which;
   console.log(keyCode);
-  if (keyCode == 87) {
+  if (keyCode == 87) { // 前
     Controls.forward = true;
-  } else if (keyCode == 83) {
+  } else if (keyCode == 83) { // 后
     Controls.backward = true;
-  } else if (keyCode == 65) {
+  } else if (keyCode == 65) { // 左
     Controls.leftward = true;
-  } else if (keyCode == 68) {
+  } else if (keyCode == 68) { // 右
     Controls.rightward = true;
-  } else if (keyCode == 74) {
+  } else if (keyCode == 74) { // 射击
     Controls.shoot = true;
   } else if (keyCode == 82) { // R
     game_board.build_demo_game_board();
@@ -55,6 +60,7 @@ function onDocumentKeyDown(event) {
   }
 };
 
+// 添加键盘抬起事件
 window.addEventListener("keyup", onDocumentKeyUp, false);
 function onDocumentKeyUp(event) {
   var keyCode = event.which;
@@ -74,4 +80,4 @@ function onDocumentKeyUp(event) {
   }
 };
 
-export {game_board}
+export { game_board }

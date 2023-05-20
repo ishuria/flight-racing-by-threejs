@@ -13,36 +13,26 @@ class Bullet {
    * 构造函数
    * @param {*} position 
    * @param {*} direction 
-   * @param {*} uuid 
+   * @param {*} uuid 这个子弹所属的飞机的uuid，用于判断命中用，自己的子弹不会命中自己
    */
   constructor(position, direction, uuid) {
     this.uuid = uuid;
     this.bullet_speed = 10;
     this.direction = direction;
-    // create a cube geometry;
-    // this shape will be duplicated to create the cloud
+    // 建模
     var geom = new THREE.BoxGeometry(20, 20, 20);
-
-    // create a material; a simple white material will do the trick
     var mat = new THREE.MeshPhongMaterial({
       color: Colors.white,
     });
-    // create the mesh by cloning the geometry
     var mesh = new THREE.Mesh(geom, mat);
-
-    // set the position and the rotation of each cube randomly
-    // set the position and the rotation of each cube randomly
+    // 设置位置
     mesh.position.set(position.x, position.y, position.z);
     mesh.rotation.z = Math.random() * Math.PI * 2;
     mesh.rotation.y = Math.random() * Math.PI * 2;
-
-    // set the size of the cube randomly
+    // 大小
     var s = .5;
     mesh.scale.set(s, s, s);
 
-    // allow each cube to cast and to receive shadows
-    // mesh.castShadow = true;
-    // mesh.receiveShadow = true;
     this.mesh = mesh;
   }
 
@@ -82,6 +72,7 @@ class Bullet {
           needRemoveIndex.push(fighterIndex);
         }
       }
+      // 如果命中，就移除ai的飞机
       for (var i = needRemoveIndex.length -1; i >= 0; i--) {
         PlaneHolder.splice(needRemoveIndex[i],1);
       }
@@ -90,6 +81,11 @@ class Bullet {
   }
 }
 
+/**
+ * 子弹命中后的效果处理函数
+ * @param {*} count_down_seconds 
+ * @returns 
+ */
 function post_hit(count_down_seconds) {
   document.querySelector('.semi-transparent-info').innerHTML = 'You were hit. Wait for ' + count_down_seconds + ' seconds to rejoin the game.';
   if (count_down_seconds === 0) {

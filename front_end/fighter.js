@@ -6,16 +6,17 @@ import { Controls } from './consts.js';
 import { reportPosition, reportBullet } from './websockets/websocket.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-// Instantiate a loader
-const loader = new GLTFLoader();
+// GLTFLoader，加载外部模型用
+// 目前还用不上
+const gltfLoader = new GLTFLoader();
+
 /**
  * 保存场景里所有飞机记录
  */
 const PlaneHolder = []
 
 /**
- * 飞机
- * 用户控制的、ai控制的、其他用户控制的
+ * 飞机类
  */
 class Plane {
   constructor(scene, obit_height, is_user_control, camera, is_ai_control, x, z, uuid) {
@@ -41,13 +42,11 @@ class Plane {
       shoot: false,
     };
 
-
-
     // 每秒最多发射一枚子弹
     this.shoot_cooldown = 0.1;
     this.last_shoot_timestamp = 0;
 
-
+    // 外部模型加载代码，目前还用不上
     // let fighter;
     // // Load a glTF resource
     // loader.load(
@@ -78,7 +77,7 @@ class Plane {
 
     this.mesh = new THREE.Object3D();
 
-    // Create the cabin
+    // 建模
     var geomCockpit = new THREE.BoxGeometry(60, 50, 50, 1, 1, 1);
     var matCockpit = new THREE.MeshPhongMaterial({ color: Colors.red, shading: THREE.FlatShading });
     var cockpit = new THREE.Mesh(geomCockpit, matCockpit);
@@ -86,7 +85,6 @@ class Plane {
     cockpit.receiveShadow = true;
     this.mesh.add(cockpit);
 
-    // Create the engine
     var geomEngine = new THREE.BoxGeometry(20, 50, 50, 1, 1, 1);
     var matEngine = new THREE.MeshPhongMaterial({ color: Colors.white, shading: THREE.FlatShading });
     var engine = new THREE.Mesh(geomEngine, matEngine);
@@ -95,7 +93,6 @@ class Plane {
     engine.receiveShadow = true;
     this.mesh.add(engine);
 
-    // Create the tail
     var geomTailPlane = new THREE.BoxGeometry(15, 20, 5, 1, 1, 1);
     var matTailPlane = new THREE.MeshPhongMaterial({ color: Colors.red, shading: THREE.FlatShading });
     var tailPlane = new THREE.Mesh(geomTailPlane, matTailPlane);
@@ -104,7 +101,6 @@ class Plane {
     tailPlane.receiveShadow = true;
     this.mesh.add(tailPlane);
 
-    // Create the wing
     var geomSideWing = new THREE.BoxGeometry(40, 8, 150, 1, 1, 1);
     var matSideWing = new THREE.MeshPhongMaterial({ color: Colors.red, shading: THREE.FlatShading });
     var sideWing = new THREE.Mesh(geomSideWing, matSideWing);
@@ -112,14 +108,12 @@ class Plane {
     sideWing.receiveShadow = true;
     this.mesh.add(sideWing);
 
-    // propeller
     var geomPropeller = new THREE.BoxGeometry(20, 10, 10, 1, 1, 1);
     var matPropeller = new THREE.MeshPhongMaterial({ color: Colors.brown, shading: THREE.FlatShading });
     this.propeller = new THREE.Mesh(geomPropeller, matPropeller);
     this.propeller.castShadow = true;
     this.propeller.receiveShadow = true;
 
-    // blades
     var geomBlade = new THREE.BoxGeometry(1, 100, 20, 1, 1, 1);
     var matBlade = new THREE.MeshPhongMaterial({ color: Colors.brownDark, shading: THREE.FlatShading });
 
@@ -132,8 +126,6 @@ class Plane {
     this.mesh.add(this.propeller);
 
     this.mesh.scale.set(.25, .25, .25);
-
-
 
     // 初始位置
     this.mesh.position.set(x, this.obit_height, z);
@@ -160,6 +152,10 @@ class Plane {
     this.update_multi();
   }
 
+  /**
+   * 更新用户自己的飞机信息
+   * @returns 
+   */
   update_user() {
     if (this.is_hit) {
       return;
@@ -182,12 +178,12 @@ class Plane {
       this.mesh.position.x += this.fighter_speed;
       is_position_changed = true;
     }
-
+    // 计算飞机朝向
     this.respective_look_at_direction = get_shoot_direction(Controls, this.respective_look_at_direction);
     let look_at_direction = get_look_at_direction(Controls, this.mesh.position, this.respective_look_at_direction);
-
     this.mesh.lookAt(look_at_direction.x, look_at_direction.y, look_at_direction.z);
 
+    // 处理射击事件
     if (Controls.shoot) {
       const currentDate = new Date();
       const timestamp = currentDate.getTime();
@@ -197,13 +193,13 @@ class Plane {
         BulletHolder.push(b);
         this.last_shoot_timestamp = timestamp;
         if (GameMode === GameModeMulti) {
-          reportBullet(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z, 
+          reportBullet(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z,
             this.respective_look_at_direction.x, this.respective_look_at_direction.y, this.respective_look_at_direction.z,
             this.uuid);
         }
       }
     }
-    // this.mesh.position.x += 1;
+    // 处理螺旋桨旋转
     this.propeller.rotation.x += 0.3;
 
     this.camera.position.x = this.mesh.position.x;
@@ -216,6 +212,9 @@ class Plane {
     }
   }
 
+  /**
+   * ai的处理函数
+   */
   update_ai() {
     const currentDate = new Date();
     const timestamp = currentDate.getTime();
@@ -251,6 +250,7 @@ class Plane {
       this.mesh.position.x += this.fighter_speed;
       this.check_border();
     }
+    // 处理ai射击事件
     if (this.ai_control.shoot) {
       const currentDate = new Date();
       const timestamp = currentDate.getTime();
@@ -270,11 +270,16 @@ class Plane {
     this.propeller.rotation.x += 0.3;
   }
 
+  /**
+   * 更新多人游戏中，其他玩家飞机螺旋桨旋转
+   */
   update_multi() {
-    // this.mesh.position.x += 1;
     this.propeller.rotation.x += 0.3;
   }
 
+  /**
+   * 检查用户是否超出了地图大小限制
+   */
   check_border() {
     if (this.mesh.position.x > MapSize / 2) {
       this.mesh.position.x = MapSize / 2;
@@ -289,7 +294,6 @@ class Plane {
       this.mesh.position.z = -MapSize / 2;
     }
   }
-
 }
 
 /**
@@ -361,7 +365,11 @@ function get_look_at_direction(controls, position, respective_look_at_direction)
   return position.clone().add(dump);
 }
 
-
+/**
+ * 随机飞机出生点用的随机函数
+ * @param {*} max 
+ * @returns 
+ */
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }

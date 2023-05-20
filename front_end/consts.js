@@ -1,5 +1,9 @@
 import * as THREE from 'three';
 
+/**
+ * 常数定义
+ */
+
 // 预定义颜色
 const Colors = {
 	red: 0xf25346,
@@ -38,12 +42,21 @@ function SetGameMode(val) {
 // 创建场景，全局唯一
 const Scene = new THREE.Scene();
 
+// 自机，全局唯一
 let MyFighter = null;
+
+/**
+ * 设置自机
+ * @param {*} newMyFighter 
+ */
 function SetMyFighter(newMyFighter) {
 	MyFighter = newMyFighter;
 }
 
-function clear_info() {
+/**
+ * 清除提示信息
+ */
+function clearInfo() {
 	document.querySelector('.semi-transparent-info').innerHTML = '';
 }
 
@@ -51,5 +64,5 @@ export {
 	Colors, Controls, MapSize, GameMode, SetGameMode,
 	GameModeDemo, GameModeAI, GameModeMulti, Scene,
 	MyFighter, SetMyFighter,
-	clear_info
+	clearInfo
 };
