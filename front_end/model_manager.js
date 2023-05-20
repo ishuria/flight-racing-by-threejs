@@ -1,4 +1,5 @@
-
+// 外部模型管理器
+// 目前还没用
 
 const model_manager = new ModelManager();
 
@@ -34,7 +35,7 @@ class ModelManager {
     }
 
     get_random_mesh() {
-        if (mesh_holder.length <= 0){
+        if (mesh_holder.length <= 0) {
             return null;
         }
         let rand_index = Math.floor((Math.random() * mesh_holder.length) + 1);

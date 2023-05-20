@@ -1,22 +1,17 @@
 import * as THREE from 'three';
 import { Water } from 'three/addons/objects/Water.js';
 import { Sky } from 'three/addons/objects/Sky.js';
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { Plane, PlaneHolder } from './fighter.js';
-import { Sea } from './sea.js';
-import { Controls, GameMode, GameModeAI, GameModeDemo, MapSize, Scene, SetMyFighter, } from './consts.js';
+import { GameMode, GameModeAI, GameModeDemo, MapSize, Scene, SetMyFighter, } from './consts.js';
 import { BulletHolder } from './bullet.js';
 import { reportPosition, uuid } from './websockets/websocket.js';
 
+// 水面的动态需要加入每一帧的渲染，因此需要有一个全局变量
 let water = null;
 
 class GameBoard {
     constructor() {
-        // build
-        // Add a fog effect to the scene; same color as the
-        // background color used in the style sheet
-        // scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
-        // Create the camera
+        // 创建摄像机
         const aspectRatio = window.innerWidth / window.innerHeight;
         const fieldOfView = 75;
         const nearPlane = 1;
@@ -30,18 +25,14 @@ class GameBoard {
         this.camera = camera;
         this.water = null;
 
-        // Create the renderer
+        // 创建渲染器
         const renderer = new THREE.WebGLRenderer({
-            // Allow transparency to show the gradient background
-            // we defined in the CSS
             alpha: true,
-
-            // Activate the anti-aliasing; this is less performant,
-            // but, as our project is low-poly based, it should be fine :)
             antialias: true
         });
         this.renderer = renderer;
 
+        // 根据游戏模式创建不同的游戏面板
         if (GameMode === GameModeDemo) {
             this.build_demo_game_board();
         }
@@ -51,21 +42,23 @@ class GameBoard {
 
         function animate() {
             requestAnimationFrame(animate);
+            // 渲染玩家的飞机
             PlaneHolder.forEach(e => e.update());
+            // 处理超出地图边界需要移除的子弹
             let needRemoveBullet = [];
             for (let index = 0; index < BulletHolder.length; index++) {
                 const needRemove = BulletHolder[index].update();
-                if (needRemove){
+                if (needRemove) {
                     needRemoveBullet.push(index);
                 }
             }
-            for (var i = needRemoveBullet.length -1; i >= 0; i--) {
-                BulletHolder.splice(needRemoveBullet[i],1);
-              }
+            for (var i = needRemoveBullet.length - 1; i >= 0; i--) {
+                BulletHolder.splice(needRemoveBullet[i], 1);
+            }
+            // 渲染水面
             if (water) {
                 water.material.uniforms['time'].value += 1.0 / 60.0;
             }
-            console.log("BulletHolder: " + BulletHolder.length);
             renderer.render(Scene, camera);
         }
         animate();
@@ -423,16 +416,6 @@ class GameBoard {
         // to activate the lights, just add them to the scene
         Scene.add(hemisphereLight);
         Scene.add(shadowLight);
-
-
-        // const sea = new Sea();
-        // // push it a little bit at the bottom of the scene
-        // sea.mesh.position.x = 0;
-        // sea.mesh.position.y = 0;
-        // sea.mesh.position.z = 0;
-
-        // // add the mesh of the sea to the scene
-        // Scene.add(sea.mesh);
 
         const waterGeometry = new THREE.PlaneGeometry(MapSize, MapSize);
 
