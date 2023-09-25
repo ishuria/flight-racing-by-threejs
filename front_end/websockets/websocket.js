@@ -5,6 +5,9 @@ import { Plane, PlaneHolder } from "../fighter";
 import * as THREE from 'three';
 import { game_board } from "../main";
 
+// 请根据需要修改此websocket地址
+const websocketAddress = "ws://localhost:8027/web3d/ws"
+
 let uuid = "";
 let Socket = null;
 
@@ -13,7 +16,7 @@ let Socket = null;
  */
 function init_websocket() {
   // 创建WebSocket连接
-  Socket = new WebSocket("ws://106.14.121.124/web3d/ws");
+  Socket = new WebSocket(websocketAddress);
 
   // 添加WebSocket事件处理函数
   Socket.addEventListener("open", (event) => {
