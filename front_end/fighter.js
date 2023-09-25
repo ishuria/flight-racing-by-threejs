@@ -81,9 +81,9 @@ class Plane {
     // );
     // this.mesh = fighter;
 
+    // 开始为飞机建模
     this.mesh = new THREE.Object3D();
 
-    // 建模
     var geomCockpit = new THREE.BoxGeometry(60, 50, 50, 1, 1, 1);
     var matCockpit = new THREE.MeshPhongMaterial({ color: Colors.red, shading: THREE.FlatShading });
     var cockpit = new THREE.Mesh(geomCockpit, matCockpit);
@@ -139,6 +139,7 @@ class Plane {
     // 机身的相对朝向
     this.respective_look_at_direction = new Vector3(0, 0, -1);
 
+    // 放入全局容器中
     PlaneHolder.push(this);
   }
 
@@ -147,14 +148,17 @@ class Plane {
    * @returns 
    */
   update() {
+    // 如果是由用户操作的，就从用户的输入更新下一帧的飞机状态
     if (this.is_user_control) {
       this.update_user();
       return;
     }
+    // 如果是由电脑操作的，就用电脑的控制状态更新下一帧的飞机状态
     if (this.is_ai_control) {
       this.update_ai();
       return;
     }
+    // 更新场景中其他人（如果有的话）控制的飞机状态
     this.update_multi();
   }
 
@@ -163,6 +167,7 @@ class Plane {
    * @returns 
    */
   update_user() {
+    // 对于被击中的飞机，不更新状态
     if (this.is_hit) {
       return;
     }
@@ -208,24 +213,27 @@ class Plane {
     // 处理螺旋桨旋转
     this.propeller.rotation.x += 0.3;
 
+    // 摄像头跟随自己的飞机
     this.camera.position.x = this.mesh.position.x;
     this.camera.position.y = this.mesh.position.y + 200;
     this.camera.position.z = this.mesh.position.z + 200;
     this.camera.lookAt(this.mesh.position);
 
+    // 如果当前是多人对战游戏，并且自己的飞机坐标变更了，则向服务器上报新坐标
     if (GameMode === GameModeMulti && is_position_changed) {
       reportPosition(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z, look_at_direction.x, look_at_direction.y, look_at_direction.z);
     }
   }
 
   /**
-   * ai的处理函数
+   * 电脑控制的飞机的处理函数
    */
   update_ai() {
     const currentDate = new Date();
     const timestamp = currentDate.getTime();
-    // 随机方向，ai的飞行模式应该具有一定连续性，不能每一帧都变化，至少保持
+    // 随机方向，电脑的飞行模式应该具有一定连续性，不能每一帧都变化，至少保持一定时间
     if (timestamp - this.ai_last_move_timestamp > this.ai_move_period_ms) {
+      // 随机当前飞行方向
       this.ai_control = {
         forward: Math.random() < 0.5,
         backward: Math.random() < 0.5,
@@ -238,6 +246,7 @@ class Plane {
         this.ai_move_period_ms = 1000;
       }
     }
+    // 随机射击状态
     this.ai_control.shoot = Math.random() < 0.5
 
     if (this.ai_control.forward) {
@@ -256,7 +265,7 @@ class Plane {
       this.mesh.position.x += this.fighter_speed;
       this.check_border();
     }
-    // 处理ai射击事件
+    // 处理电脑的射击事件
     if (this.ai_control.shoot) {
       const currentDate = new Date();
       const timestamp = currentDate.getTime();
@@ -303,7 +312,7 @@ class Plane {
 }
 
 /**
- * 根据飞机的移动方向决定子弹发射方向
+ * 根据飞机的朝向决定子弹发射方向
  * @returns 
  */
 function get_shoot_direction(controls, respective_look_at_direction) {
