@@ -12,11 +12,10 @@ let Socket = null;
  * 初始化WebSocket连接
  */
 function init_websocket() {
-  // Create WebSocket connection.
+  // 创建WebSocket连接
   Socket = new WebSocket("ws://106.14.121.124/web3d/ws");
 
-  // 添加事件处理函数
-  // WebSocket open事件
+  // 添加WebSocket事件处理函数
   Socket.addEventListener("open", (event) => {
     document.querySelector('.semi-transparent-info').innerHTML = 'Connect server success';
     setTimeout(() => {
