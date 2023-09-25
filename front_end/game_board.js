@@ -9,6 +9,9 @@ import { reportPosition, uuid } from './websockets/websocket.js';
 // 水面的动态需要加入每一帧的渲染，因此需要有一个全局变量
 let water = null;
 
+/**
+ * 游戏类
+ */
 class GameBoard {
     constructor() {
         // 创建摄像机
@@ -40,6 +43,9 @@ class GameBoard {
             this.build_ai_game_board();
         }
 
+        /**
+         * 每一帧的渲染函数
+         */
         function animate() {
             requestAnimationFrame(animate);
             // 渲染玩家的飞机
@@ -64,6 +70,10 @@ class GameBoard {
         animate();
     }
 
+    /**
+     * 创建一局演示用的游戏
+     * 无玩家介入
+     */
     build_demo_game_board() {
         BulletHolder.length = 0;
         PlaneHolder.length = 0;
@@ -120,6 +130,7 @@ class GameBoard {
 
         const waterGeometry = new THREE.PlaneGeometry(MapSize, MapSize);
 
+        // 添加水面纹理
         water = new Water(
             waterGeometry,
             {
@@ -142,6 +153,7 @@ class GameBoard {
 
         Scene.add(water);
 
+        // 创建天空纹理
         const sky = new Sky();
         sky.scale.setScalar(10000);
         Scene.add(sky);
@@ -191,6 +203,7 @@ class GameBoard {
             Scene.add(ai_plane.mesh);
         }
 
+        // three.js的辅助函数，展示坐标轴等
         // const axisHelper = new THREE.AxesHelper(5000);
         // Scene.add(axisHelper);
 
@@ -198,6 +211,9 @@ class GameBoard {
         // scene.add( helper );
     }
 
+    /**
+     * 创建一局人机对战游戏
+     */
     build_ai_game_board() {
         BulletHolder.length = 0;
         PlaneHolder.length = 0;
@@ -361,6 +377,9 @@ class GameBoard {
         // scene.add( helper );
     }
 
+    /**
+     * 创建一局多人对战游戏
+     */
     build_multi_game_board() {
         // 清空地图
         BulletHolder.length = 0;
