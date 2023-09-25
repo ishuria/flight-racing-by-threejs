@@ -6,8 +6,10 @@ import { Controls } from './consts.js';
 import { reportPosition, reportBullet } from './websockets/websocket.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-// GLTFLoader，加载外部模型用
-// 目前还用不上
+/**
+ * GLTFLoader，加载外部模型用
+ * 目前还用不上
+ */
 const gltfLoader = new GLTFLoader();
 
 /**
@@ -20,20 +22,23 @@ const PlaneHolder = []
  */
 class Plane {
   constructor(scene, obit_height, is_user_control, camera, is_ai_control, x, z, uuid) {
+    // 是否被击中
     this.is_hit = false;
+    // 标记飞机属于哪位玩家
     this.uuid = uuid;
     this.scene = scene;
     this.camera = camera;
     this.obit_height = obit_height;
     this.fighter_speed = 5;
     this.is_user_control = is_user_control;
-    // ai参数
+    // 是否由电脑操作
     this.is_ai_control = is_ai_control;
-    // 上次ai改变方向的时间戳
+    // 上次电脑操作改变飞行方向的时间戳
+    // 避免电脑频繁改变方向影响游玩体验
     this.ai_last_move_timestamp = 0;
-    // 需要飞多久
+    // 定义电脑每次向某个方向飞行的时长
     this.ai_move_period_ms = 0;
-    // ai控制器
+    // 电脑操作时的控制状态
     this.ai_control = {
       forward: false,
       backward: false,
@@ -42,11 +47,12 @@ class Plane {
       shoot: false,
     };
 
-    // 每秒最多发射一枚子弹
+    // 每秒最多发射的子弹数目
     this.shoot_cooldown = 0.1;
+    // 上次按下射击按钮的时间戳，避免频繁射击，增强手感
     this.last_shoot_timestamp = 0;
 
-    // 外部模型加载代码，目前还用不上
+    // 外部模型加载代码，目前还用不上，仅供参考
     // let fighter;
     // // Load a glTF resource
     // loader.load(

@@ -4,7 +4,9 @@ import * as THREE from 'three';
  * 常数定义
  */
 
-// 预定义颜色
+/**
+ * 预定义颜色
+ */
 const Colors = {
 	red: 0xf25346,
 	white: 0xd8d0d1,
@@ -14,7 +16,10 @@ const Colors = {
 	blue: 0x68c3c0,
 };
 
-// 游戏控制器
+/**
+ * 全局唯一的游戏控制器
+ * 代表用户在某时刻的控制状态
+ */
 const Controls = {
 	forward: false,
 	backward: false,
@@ -23,26 +28,39 @@ const Controls = {
 	shoot: false
 }
 
-// 地图大小
+/**
+ * 地图是一个正方形区域
+ * 这里定义了正方形区域的边长
+ */
 const MapSize = 10000
 
 // 游戏模式
 let GameMode = "demo"
 // 演示模式
 const GameModeDemo = "demo"
-// 人机对战
+// 人机对战模式
 const GameModeAI = "ai"
-// 联机对战
+// 联机对战模式
 const GameModeMulti = "multi"
 
+/**
+ * 设置游戏模式
+ * @param {*} val 
+ */
 function SetGameMode(val) {
 	GameMode = val;
 }
 
-// 创建场景，全局唯一
+/**
+ * three.js用的场景变量
+ * 全局唯一
+ */
 const Scene = new THREE.Scene();
 
-// 自机，全局唯一
+/**
+ * 用户控制的飞机
+ * 全局唯一
+ */
 let MyFighter = null;
 
 /**
